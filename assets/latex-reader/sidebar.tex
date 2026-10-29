@@ -1,0 +1,144 @@
+% Independent sidebar overlay; never put answers in the third table cell.
+% Oversized or end-of-body pending notes fall back to breakable, full-width
+% detailed pages. Their source page keeps a clickable pointer.
+\makeatletter
+\zref@addprops{savepos}{abspage,page}
+\newcommand{\SourceAnchor}[1]{\nobreak\zsavepos{source-#1}}
+\def\ReaderNoteList{}
+\NewDocumentCommand{\RegisterQA}{m+m+m}{%
+  \ReaderRegisterNote{#1}{{\color{ReaderQuestion}\textbf{问题：}#2}\par\smallskip{\color{ReaderAnswer}\textbf{简答：}#3}}}
+\NewDocumentCommand{\RegisterAnswer}{m+m}{\ReaderRegisterNote{#1}{{\color{ReaderAnswer}#2}}}
+\NewDocumentCommand{\RegisterTutorialPointer}{m+m+m}{%
+  \ReaderRegisterNote{#1}{\hyperlink{#2}{\textcolor{ReaderQuestion}{#3}}}}
+\long\def\ReaderRegisterNote#1#2{%
+  \ifcsname reader-note-content-#1\endcsname
+    \PackageError{reader}{Duplicate note ID #1}{Use a unique stable annotation ID.}%
+  \fi
+  \ifx\ReaderNoteList\@empty\xdef\ReaderNoteList{#1}\else\xdef\ReaderNoteList{\ReaderNoteList,#1}\fi
+  \expandafter\gdef\csname reader-note-content-#1\endcsname{#2}%
+  \expandafter\gdef\csname reader-note-placed-#1\endcsname{0}%
+  \expandafter\newbox\csname reader-note-box-#1\endcsname
+  \expandafter\newbox\csname reader-pointer-box-#1\endcsname
+  \global\setbox\csname reader-note-box-#1\endcsname=\vbox{%
+    \color@begingroup
+    \hsize=\dimexpr\NotesWidth-12pt\relax\linewidth=\hsize\columnwidth=\hsize
+    \RaggedRight\fontsize{8.6}{12}\selectfont\parindent=0pt\parskip=0pt
+    #2\par\color@endgroup}%
+  \global\setbox\csname reader-pointer-box-#1\endcsname=\vbox{%
+    \color@begingroup
+    \hsize=\dimexpr\NotesWidth-12pt\relax\linewidth=\hsize\columnwidth=\hsize
+    \RaggedRight\fontsize{7.5}{10}\selectfont\parindent=0pt\parskip=0pt
+    \hyperlink{note-#1}{\textcolor{ReaderQuestion}{#1：解答见后续右栏或详细解释页。}}\par\color@endgroup}%
+}
+\newdimen\ReaderSidebarLeft
+\newdimen\ReaderSidebarTop
+\newdimen\ReaderSidebarBottom
+\newdimen\ReaderSidebarNext
+\newdimen\ReaderSourceY
+\newdimen\ReaderDesiredY
+\newdimen\ReaderNoteHeight
+\newbox\ReaderOverlayBox
+\newif\ifReaderPending
+\newcommand{\ReaderDrawConnector}[2]{%
+  \coordinate (reader-src) at ([xshift=\zposx{source-#1}sp,yshift=\zposy{source-#1}sp]current page.south west);
+  \coordinate (reader-drop) at ([yshift=-3pt]reader-src);
+  \coordinate (reader-gutter) at ([xshift=-3pt]#2.west);
+  \draw[ReaderRule,line width=.5pt] (reader-src)--(reader-drop)--(reader-gutter |- reader-drop)--(reader-gutter |- #2.west)--(#2.west);
+}
+\newcommand{\ReaderTryNote}[1]{%
+  \edef\ReaderSourcePage{\zref@extractdefault{source-#1}{abspage}{0}}%
+  \ifnum\csname reader-note-placed-#1\endcsname=0\relax
+    \ifnum\ReaderSourcePage>0\relax
+      \ifnum\ReaderSourcePage>\ReadonlyShipoutCounter\relax\else
+        \ReaderNoteHeight=\dimexpr\ht\csname reader-note-box-#1\endcsname+\dp\csname reader-note-box-#1\endcsname+12pt\relax
+        \ReaderDesiredY=\ReaderSidebarNext
+        \ifnum\ReaderSourcePage=\ReadonlyShipoutCounter\relax
+          \ReaderSourceY=\dimexpr\paperheight-\zposy{source-#1}sp-12pt\relax
+          \ifdim\ReaderSourceY>\ReaderDesiredY\ReaderDesiredY=\ReaderSourceY\fi
+          % Moving the complete box upward is permitted; body remains fixed.
+          \ifdim\dimexpr\ReaderDesiredY+\ReaderNoteHeight\relax>\ReaderSidebarBottom
+            \ReaderDesiredY=\dimexpr\ReaderSidebarBottom-\ReaderNoteHeight\relax
+            \ifdim\ReaderDesiredY<\ReaderSidebarNext\ReaderDesiredY=\ReaderSidebarNext\fi
+          \fi
+        \fi
+        \ifdim\dimexpr\ReaderDesiredY+\ReaderNoteHeight\relax>\ReaderSidebarBottom
+          % Leave the note queued; a later body page or the appendix will hold it.
+        \else
+          \global\setbox\ReaderOverlayBox=\copy\csname reader-note-box-#1\endcsname
+          \node[anchor=north west,draw=ReaderRule,line width=.5pt,fill=white,
+            inner xsep=4pt,inner ysep=6pt,outer sep=0pt,align=left]
+            (reader-note-#1) at ([xshift=\ReaderSidebarLeft,yshift=-\ReaderDesiredY]current page.north west)
+            {\hypertarget{note-#1}{}\box\ReaderOverlayBox};
+          \expandafter\gdef\csname reader-note-placed-#1\endcsname{1}%
+          \ifnum\ReaderSourcePage=\ReadonlyShipoutCounter\relax\ReaderDrawConnector{#1}{reader-note-#1}\fi
+          \immediate\write\ReaderNoteLog{#1|\the\ReadonlyShipoutCounter|sidebar|\strip@pt\ReaderDesiredY|\strip@pt\ReaderNoteHeight}%
+          \ReaderSidebarNext=\dimexpr\ReaderDesiredY+\ReaderNoteHeight+12pt\relax
+        \fi
+      \fi
+    \fi
+  \fi
+  \ifnum\ReaderSourcePage=\ReadonlyShipoutCounter\relax
+    \ifnum\csname reader-note-placed-#1\endcsname=0\relax
+      % Pending pointers use the same allocation cursor as QA frames. When no
+      % room remains, the highlighted source itself is still a direct link.
+      \ReaderSourceY=\dimexpr\paperheight-\zposy{source-#1}sp\relax
+      \ReaderNoteHeight=\dimexpr\ht\csname reader-pointer-box-#1\endcsname+\dp\csname reader-pointer-box-#1\endcsname+4pt\relax
+      \ReaderDesiredY=\ReaderSidebarNext
+      \ifdim\ReaderSourceY>\ReaderDesiredY\ReaderDesiredY=\ReaderSourceY\fi
+      \ifdim\dimexpr\ReaderDesiredY+\ReaderNoteHeight\relax>\ReaderSidebarBottom
+        \ReaderDesiredY=\dimexpr\ReaderSidebarBottom-\ReaderNoteHeight\relax
+        \ifdim\ReaderDesiredY<\ReaderSidebarNext\ReaderDesiredY=\ReaderSidebarNext\fi
+      \fi
+      \ifdim\dimexpr\ReaderDesiredY+\ReaderNoteHeight\relax>\ReaderSidebarBottom\else
+        \global\setbox\ReaderOverlayBox=\copy\csname reader-pointer-box-#1\endcsname
+        \node[anchor=north west,inner sep=0pt,outer sep=0pt,align=left]
+          (reader-pointer-#1) at ([xshift=\ReaderSidebarLeft,yshift=-\ReaderDesiredY]current page.north west)
+          {\box\ReaderOverlayBox};
+        \ReaderDrawConnector{#1}{reader-pointer-#1}%
+        \immediate\write\ReaderNoteLog{#1|\the\ReadonlyShipoutCounter|pointer|\strip@pt\ReaderDesiredY|\strip@pt\ReaderNoteHeight}%
+        \ReaderSidebarNext=\dimexpr\ReaderDesiredY+\ReaderNoteHeight+8pt\relax
+      \fi
+    \fi
+  \fi
+}
+\AddToHook{shipout/foreground}{%
+  \ifReaderDetailActive\else
+    \begingroup
+      \ReaderSidebarLeft=\dimexpr1in+\hoffset+\oddsidemargin+5\tabcolsep+\EnglishWidth+\ChineseWidth+\arrayrulewidth\relax
+      \ReaderSidebarTop=\dimexpr1in+\voffset+\topmargin+\headheight+\headsep\relax
+      \ReaderSidebarBottom=\dimexpr\ReaderSidebarTop+\textheight-4pt\relax
+      \ReaderSidebarNext=\ReaderSidebarTop
+      \begin{tikzpicture}[remember picture,overlay]
+        \@for\ReaderID:=\ReaderNoteList\do{\expandafter\ReaderTryNote\expandafter{\ReaderID}}%
+      \end{tikzpicture}
+    \endgroup
+  \fi
+}
+\newcommand{\ReaderFlushNotes}{%
+  \clearpage
+  \ReaderPendingfalse
+  \@for\ReaderID:=\ReaderNoteList\do{%
+    \ifnum\csname reader-note-placed-\ReaderID\endcsname=0\relax\ReaderPendingtrue\fi}%
+  \ifReaderPending
+    \ReaderDetailedPage{reader-pending-notes}{阅读备注：补充解答}{%
+      \@for\ReaderID:=\ReaderNoteList\do{%
+        \ifnum\csname reader-note-placed-\ReaderID\endcsname=0\relax
+          \par\medskip\hypertarget{note-\ReaderID}{}%
+          {\bfseries\ReaderID}\quad
+          \edef\ReaderSourcePage{\zref@extractdefault{source-\ReaderID}{page}{?}}%
+          \edef\ReaderSourceAbsolute{\zref@extractdefault{source-\ReaderID}{abspage}{0}}%
+          \ifnum\ReaderSourceAbsolute=0\relax
+            \PackageWarningNoLine{reader}{Unresolved source anchor \ReaderID. Rerun LaTeX; if persistent, add SourceAnchor for this ID}%
+          \fi
+          对应正文第\ReaderSourcePage 页\par\smallskip
+          \csname reader-note-content-\ReaderID\endcsname\par\medskip
+          \expandafter\gdef\csname reader-note-placed-\ReaderID\endcsname{1}%
+          \immediate\write\ReaderNoteLog{\ReaderID|appendix|detail||}%
+        \fi}%
+    }%
+  \fi
+}
+% This hook is a final safety net. Calling ReaderFlushNotes explicitly after
+% the final table is clearer and allows body content to follow if desired.
+\AtEndDocument{\ReaderFlushNotes\immediate\closeout\ReaderNoteLog\immediate\closeout\ReaderPageLog}
+\makeatother

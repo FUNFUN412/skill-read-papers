@@ -1,0 +1,22 @@
+% IDs correspond to native highlights and SourceAnchor in main.tex.
+\RegisterQA{N001}{这里的\(p\)是什么？}{\(p\)是出现正面的概率，取值范围为零到一。例如\(p=0.7\)表示在同样条件下重复抛掷时，正面出现的比例通常会接近\(70\%\)。一次结果仍只有正面或反面；概率不是某次抛掷的结果。这一解释故意长于对应的原文段落，用于检验右栏与正文独立排版。}
+% Oversized demonstration: the answer is ordinary breakable prose in the
+% fallback detailed page. It must never be clipped or silently dropped.
+\RegisterAnswer{N002}{%
+  以下为原创排版测试。右栏足够时，备注与对应段落通过横平竖直的折线连接；长度超过右栏可用空间时，保留完整内容并给出跳转提示。
+  \par\medskip
+  \textbf{第一步：区分随机变量与一次观测。}随机变量描述可能的取值及其概率；一次观测是其中一个具体结果。不要把概率\(0.7\)解释为一次结果等于\(0.7\)。
+  \par\medskip
+  \textbf{第二步：写出概率表。}对于二元变量，\(X=1\)的概率为\(p\)，\(X=0\)的概率为\(1-p\)，两者相加等于一。
+  \par\medskip
+  \textbf{第三步：计算期望。}离散变量的期望是各取值乘以相应概率后求和，因此\(\mathbb{E}[X]=1\cdot p+0\cdot(1-p)=p\)。期望可以不是单次实验可能得到的值。
+  \par\medskip
+  \textbf{第四步：检验边界。}若\(p=0\)，结果恒为零；若\(p=1\)，结果恒为一；若\(p=0.5\)，两个结果等可能。三个边界都与公式一致。
+  \par\medskip
+  \textbf{第五步：区分原文与教学补充。}上述说明和数值检验都是模板的原创例子，不代表某篇真实论文的原文、实验或结论。
+  \par\medskip
+  \textbf{第六步：保留来源对应。}替换为实际论文时，正文单元使用稳定编号，备注保存源页码与位置；英文和中文分别标记同一语义片段。独立公式只在跨两栏的区域呈现一次。
+  \par\medskip
+  \textbf{第七步：检查长备注。}正文段落短，并不意味着右栏解答也必须短。本段落的侧栏版本会明显高于原文；完整说明应在可容纳的页面呈现，不应扩大英文和中文正文行。
+  \par\medskip
+  \textbf{第八步：检查编译成品。}编译成功后仍要查看页面图像，检查字体、页眉横线、分栏线、连线、完整公式、页码以及跳转目标。}

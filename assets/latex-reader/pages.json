@@ -1,0 +1,29 @@
+{
+  "expected_physical_pages": 4,
+  "pages": [
+    {
+      "physical_page": 1,
+      "kind": "body",
+      "printed_label": "1",
+      "header_text": "A Coin Experiment: A Synthetic Reading Example"
+    },
+    {
+      "physical_page": 2,
+      "kind": "detail",
+      "printed_label": "",
+      "header_text": "详细解释页"
+    },
+    {
+      "physical_page": 3,
+      "kind": "body",
+      "printed_label": "2",
+      "header_text": "A Coin Experiment: A Synthetic Reading Example"
+    },
+    {
+      "physical_page": 4,
+      "kind": "detail",
+      "printed_label": "",
+      "header_text": "详细解释页"
+    }
+  ]
+}

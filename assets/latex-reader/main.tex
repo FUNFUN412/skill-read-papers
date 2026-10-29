@@ -1,0 +1,43 @@
+% !TeX program = xelatex
+% Synthetic demonstration: no article text, figures, or user annotations.
+% Copy this directory to a new paper project, then replace the examples.
+% Build: latexmk -xelatex -interaction=nonstopmode -halt-on-error main.tex
+\documentclass[UTF8,fontset=fandol,10pt]{ctexart}
+\newcommand{\ReaderTitle}{A Coin Experiment: A Synthetic Reading Example}
+\newcommand{\ReaderDate}{2026-10-29}
+\usepackage{reader}
+\hypersetup{pdftitle={Synthetic bilingual reading example}}
+% Register notes after begin-document: the font and CJK contexts are ready.
+\AtBeginDocument{\input{notes.tex}}
+\begin{document}
+\begin{longtable}{p{\EnglishWidth}p{\ChineseWidth}|p{\NotesWidth}}
+\endfirsthead\endhead\endfoot\endlastfoot
+\Pair{P001}{We observe a coin once. Let \NativeHL{N001}{the probability of heads} be \(p\), with \(0\leq p\leq1\). This is an original example for checking a bilingual reader.}
+{我们观察一次抛硬币的结果。令\NativeHL{N001}{出现正面的概率}\SourceAnchor{N001}为\(p\)，其中\(0\leq p\leq1\)。这是用于检验双语精读稿的原创示例。}
+\Pair{P002}{Define a binary random variable \(X\): heads has value one, and tails has value zero. The event and its numerical encoding are different concepts.}
+{定义一个二元随机变量\(X\)：正面编码为一，反面编码为零。事件本身与它的数值编码是不同概念。}
+\EquationRow{E001}{1}{\Pr(X=1)=p,\qquad \Pr(X=0)=1-p,\qquad \mathbb{E}[X]=p.}
+\Pair{P003}{The displayed equation is shared by the English and Chinese reading columns. It appears once, with its original identifier.}
+{上面的独立公式由英文与中文阅读栏共享，只出现一次，并保留稳定编号。}
+\SharedRow{F001}{\par\centering
+\begin{tikzpicture}[>=stealth,node distance=40mm]
+\node[draw,circle,minimum size=12mm] (h) {\(X=1\)};
+\node[draw,circle,minimum size=12mm,right of=h] (t) {\(X=0\)};
+\draw[->] (h) to[bend left] node[above]{\(1-p\)} (t);
+\draw[->] (t) to[bend left] node[below]{\(p\)} (h);
+\end{tikzpicture}\par\smallskip Synthetic transition sketch / 原创状态转移示意图。}
+\end{longtable}
+
+% Insert only after closing the table. Every inserted page is unnumbered.
+\ReaderDetailedPage{detail-coin}{硬币示例：从概率到期望}{\input{tutorial.tex}}
+
+% Resume directly here, not through an input file before a shared row.
+\begin{longtable}{p{\EnglishWidth}p{\ChineseWidth}|p{\NotesWidth}}
+\endfirsthead\endhead\endfoot\endlastfoot
+\Pair{P004}{A long explanation may be useful even when the associated source paragraph is short. The right-column layout must not change the height of this paragraph.}
+{即使对应原文很短，\NativeHL{N002}{解答也可能较长}\SourceAnchor{N002}。右栏的排版不得改变这一段正文的高度。}
+\Pair{P005}{If a note cannot fit in the sidebar, a linked detailed-note page holds its full content. The body page counter continues from the preceding body page.}
+{如果备注无法放入右栏，完整内容将移至可跳转的详细解释页。正文页码接续上一张正文页。}
+\end{longtable}
+\ReaderFlushNotes
+\end{document}

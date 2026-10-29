@@ -1,0 +1,105 @@
+% Reusable three-column reader. Tested with XeLaTeX; no shell escape required.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{reader}[2026/10/29 Bilingual paper reader]
+\RequirePackage[a4paper,landscape,left=11mm,right=11mm,top=15mm,bottom=13mm,headheight=5mm,headsep=3mm]{geometry}
+\RequirePackage{fontspec}
+\setmainfont{texgyretermes-regular.otf}[BoldFont=texgyretermes-bold.otf,ItalicFont=texgyretermes-italic.otf,BoldItalicFont=texgyretermes-bolditalic.otf]
+\setsansfont{texgyreheros-regular.otf}[BoldFont=texgyreheros-bold.otf,ItalicFont=texgyreheros-italic.otf,BoldItalicFont=texgyreheros-bolditalic.otf]
+\RequirePackage{amsmath,amssymb,graphicx,array,longtable,booktabs}
+\RequirePackage[table]{xcolor}
+\RequirePackage{ragged2e,fancyhdr,hyperref,xeCJKfntef,tikz}
+\RequirePackage{zref-savepos,zref-abspage}
+\usetikzlibrary{calc}
+\hypersetup{unicode=true,colorlinks=true,linkcolor=black,urlcolor=blue!55!black}
+\definecolor{ReaderRule}{HTML}{6B7F8C}
+\definecolor{ReaderHighlight}{HTML}{FFE6A0}
+\definecolor{ReaderQuestion}{HTML}{183D72}
+\definecolor{ReaderAnswer}{HTML}{8D202B}
+\providecommand{\ReaderTitle}{An editable bilingual paper reader}
+\providecommand{\ReaderDate}{\today}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+\setlength{\tabcolsep}{2.5mm}
+\setlength{\arrayrulewidth}{0.6pt}
+\setlength{\LTpre}{0pt}
+\setlength{\LTpost}{0pt}
+\setlength{\emergencystretch}{2em}
+\newlength{\ReaderWidth}
+\setlength{\ReaderWidth}{\dimexpr\textwidth-6\tabcolsep-\arrayrulewidth\relax}
+\newlength{\EnglishWidth}\setlength{\EnglishWidth}{.4\ReaderWidth}
+\newlength{\ChineseWidth}\setlength{\ChineseWidth}{.4\ReaderWidth}
+\newlength{\NotesWidth}\setlength{\NotesWidth}{\dimexpr\ReaderWidth-\EnglishWidth-\ChineseWidth\relax}
+\newlength{\SharedWidth}\setlength{\SharedWidth}{\dimexpr\EnglishWidth+\ChineseWidth+2\tabcolsep\relax}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\fontsize{7.5}{9}\selectfont\sffamily\ReaderTitle}
+\fancyhead[R]{\fontsize{7.5}{9}\selectfont\sffamily\ReaderDate}
+\fancyfoot[C]{\scriptsize\sffamily\thepage}
+\renewcommand{\headrulewidth}{.4pt}
+\renewcommand{\footrulewidth}{0pt}
+\fancypagestyle{ReaderDetailed}{%
+  \fancyhf{}%
+  \fancyhead[L]{\color{ReaderAnswer}\bfseries\fontsize{8}{9}\selectfont 详细解释页}%
+  \renewcommand{\headrulewidth}{.4pt}%
+  \renewcommand{\footrulewidth}{0pt}%
+  \renewcommand{\headrule}{{\color{ReaderAnswer}\hrule height\headrulewidth width\headwidth\vskip-\headrulewidth}}%
+}
+\arrayrulecolor{ReaderRule}
+% Keep tables explicit in main.tex. In particular, do not resume a table inside
+% an input file immediately before a multicolumn row (TeX alignment boundary).
+\newcommand{\ReaderBlockMark}[1]{\textcolor{ReaderRule}{\fontsize{6.5}{8}\selectfont\sffamily #1}\enspace}
+\NewDocumentCommand{\Pair}{m+m+m}{%
+  \begin{minipage}[t]{\linewidth}\vspace{0pt}\RaggedRight\fontsize{10}{13.7}\selectfont
+    \rule[-4pt]{0pt}{16pt}\hypertarget{block-#1-en}{}\zsavepos{row-#1-en}\ReaderBlockMark{#1}#2\par\vspace{2mm}\end{minipage}%
+  &\begin{minipage}[t]{\linewidth}\vspace{0pt}\RaggedRight\fontsize{10}{13.7}\selectfont
+    \rule[-4pt]{0pt}{16pt}\hypertarget{block-#1-zh}{}\zsavepos{row-#1-zh}\ReaderBlockMark{#1}#3\par\vspace{2mm}\end{minipage}%
+  &\mbox{}\\}
+% Must remain expandable: multicolumn needs to be the first alignment token.
+\long\def\SharedRow#1#2{%
+  \multicolumn{2}{p{\SharedWidth}|}{%
+    \begin{minipage}[t]{\linewidth}\vspace{0pt}\RaggedRight\fontsize{10}{13.7}\selectfont
+    \rule[-4pt]{0pt}{16pt}\hypertarget{block-#1}{}\zsavepos{row-#1-shared}\ReaderBlockMark{#1}#2\par\vspace{2mm}\end{minipage}}&\mbox{}\\}
+\long\def\EquationRow#1#2#3{\SharedRow{#1}{\par\smallskip\centering\(\displaystyle #3\)\quad(#2)}}
+\long\def\ImageRow#1#2#3{\SharedRow{#1}{\par\smallskip\centering\includegraphics[width=\linewidth,height=.65\textheight,keepaspectratio]{#2}\par\smallskip #3}}
+% Text highlighter is breakable; math highlighter uses zero padding to retain
+% the original inline dimensions. Put SourceAnchor outside either scanner.
+\NewDocumentCommand{\ReaderLinkIfKnown}{m+m}{%
+  \ifcsname reader-note-content-#1\endcsname\hyperlink{note-#1}{#2}\else#2\fi}
+\NewDocumentCommand{\NativeHL}{m+m}{\ReaderLinkIfKnown{#1}{\CJKunderline[skip=false,format=\color{ReaderHighlight},thickness=1.1em,depth=-.88em]{#2}}}
+\NewDocumentCommand{\NativeMathHL}{m+m}{\ReaderLinkIfKnown{#1}{\begingroup\setlength{\fboxsep}{0pt}\colorbox{ReaderHighlight}{$\textstyle #2$}\endgroup}}
+\newif\ifReaderDetailActive
+\newcount\ReaderSavedPage
+\newwrite\ReaderPageLog
+\newwrite\ReaderNoteLog
+\AtBeginDocument{%
+  \immediate\openout\ReaderPageLog=\jobname.reader-pages.tsv
+  \immediate\write\ReaderPageLog{physical_page|printed_page|kind}%
+  \immediate\openout\ReaderNoteLog=\jobname.reader-notes.tsv
+  \immediate\write\ReaderNoteLog{id|physical_page|placement|top_pt|height_pt}%
+}
+\AddToHook{shipout/after}{%
+  \ifReaderDetailActive
+    \immediate\write\ReaderPageLog{\the\ReadonlyShipoutCounter||detail}%
+  \else
+    \immediate\write\ReaderPageLog{\the\ReadonlyShipoutCounter|\thepage|body}%
+  \fi}
+% Call outside longtable. Content can flow onto several pages when needed;
+% every inserted page is unnumbered and body numbering resumes unchanged.
+% For the requested one-page tutorial, verify the resulting physical page count.
+\NewDocumentCommand{\ReaderDetailedPage}{m+m+m}{%
+  \clearpage
+  \ReaderSavedPage=\value{page}%
+  \begingroup
+    \ReaderDetailActivetrue
+    \pagestyle{ReaderDetailed}\color{ReaderAnswer}%
+    \colorlet{ReaderQuestion}{ReaderAnswer}%
+    \hypersetup{pageanchor=false,linkcolor=ReaderAnswer,urlcolor=ReaderAnswer}%
+    \renewcommand{\thepage}{}\thispdfpagelabel{}%
+    \hypertarget{#1}{}%
+    {\bfseries\fontsize{14}{17}\selectfont #2}\par\medskip
+    #3\par\clearpage
+  \endgroup
+  \setcounter{page}{\the\ReaderSavedPage}%
+}
+\input{sidebar.tex}
+\endinput
