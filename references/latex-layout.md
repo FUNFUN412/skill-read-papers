@@ -51,7 +51,7 @@ latexmk -xelatex -interaction=nonstopmode -halt-on-error main.tex
 模板附有原创示例的 `pages.json`，替换内容后要按本次成稿更新。模板输出 `main.reader-pages.tsv` 与 `main.reader-notes.tsv`，用于查看实际物理/逻辑页映射和备注去向；这些 TSV 不是两个 Python 工具的输入 JSON，需要核对后转换为 `pages.json` / 位置数据，不能把后缀改为 JSON 就传入。
 
 ```bash
-python /path/to/skill-reading-papers/scripts/audit_reader.py main.pdf \
+python /path/to/skill-read-papers/scripts/audit_reader.py main.pdf \
   --plan pages.json --output qa_report.json --log main.log \
   --positions positions.json --tolerance 0.5
 ```

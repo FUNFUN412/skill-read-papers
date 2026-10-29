@@ -1,14 +1,14 @@
 <div align="center">
 
-# 📖 skill-reading-papers
+# 📖 skill-read-papers
 
 ### 让 Agent 陪你逐段读懂论文，把高光和问题变成可持续更新的三栏精读稿
 
 [![Agent Skill](https://img.shields.io/badge/Agent-Skill-111827?style=flat-square&logo=openai&logoColor=white)](SKILL.md)
 [![LaTeX](https://img.shields.io/badge/LaTeX-XeLaTeX-008080?style=flat-square&logo=latex&logoColor=white)](assets/latex-reader/)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat-square&logo=python&logoColor=white)](requirements.txt)
-[![License](https://img.shields.io/github/license/FUNFUN412/skill-reading-papers?style=flat-square)](LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/FUNFUN412/skill-reading-papers?style=flat-square&logo=github)](https://github.com/FUNFUN412/skill-reading-papers/stargazers)
+[![License](https://img.shields.io/github/license/FUNFUN412/skill-read-papers?style=flat-square)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/FUNFUN412/skill-read-papers?style=flat-square&logo=github)](https://github.com/FUNFUN412/skill-read-papers/stargazers)
 
 基于真实论文协作精读过程整理的 **Agent Skill + LaTeX 模板 + PDF 标注工具**。
 从英文原文、中文对照到右栏问答，交付可编辑的 `.tex` 和实际编译的 `.pdf`。
@@ -79,11 +79,11 @@ flowchart LR
 <summary><b>📋 点击展开：复制给 Agent 的部署提示词</b></summary>
 
 ```text
-请帮我部署 https://github.com/FUNFUN412/skill-reading-papers 中的 skill-reading-papers。
+请帮我部署 https://github.com/FUNFUN412/skill-read-papers 中的 skill-read-papers。
 
 要求：
 1. 检查当前 Agent 的技能目录及是否已经安装；已有版本先查看本地修改，不覆盖我的文件。
-2. 将仓库安装到当前 Agent 的全局 skills 目录。Codex 可手动克隆到 ~/.codex/skills/skill-reading-papers；支持 npx skills 时也可用它安装。
+2. 将仓库安装到当前 Agent 的全局 skills 目录。Codex 可手动克隆到 ~/.codex/skills/skill-read-papers；支持 npx skills 时也可用它安装。
 3. 检查 Python 3.10+，在独立虚拟环境安装 requirements.txt。使用该环境运行 python -m unittest discover -s tests -v，确认真实测试通过。
 4. 检查 XeLaTeX、latexmk、ctex/Fandol 与模板所需包。缺失时按当前系统补齐实际缺项，避免改动无关配置。
 5. 将 assets/latex-reader 复制到技能目录之外的临时测试目录，用 latexmk -xelatex -interaction=nonstopmode -halt-on-error main.tex 实际编译，直到坐标稳定。
@@ -118,16 +118,16 @@ flowchart LR
 支持 [Skills CLI](https://github.com/vercel-labs/skills) 的环境可执行（当前 CLI 要求 Node.js 22.20+）：
 
 ```bash
-npx skills add https://github.com/FUNFUN412/skill-reading-papers \
-  --skill skill-reading-papers -g -y
+npx skills add https://github.com/FUNFUN412/skill-read-papers \
+  --skill skill-read-papers -g -y
 ```
 
 也可以直接安装到 Codex 的全局目录：
 
 ```bash
 mkdir -p ~/.codex/skills
-git clone https://github.com/FUNFUN412/skill-reading-papers.git \
-  ~/.codex/skills/skill-reading-papers
+git clone https://github.com/FUNFUN412/skill-read-papers.git \
+  ~/.codex/skills/skill-read-papers
 ```
 
 已有同名目录时先检查其内容和本地修改；不要直接覆盖。其他 Agent 将仓库根目录放入其支持的 skills 路径，根目录的 `SKILL.md` 就是入口。
@@ -137,7 +137,7 @@ git clone https://github.com/FUNFUN412/skill-reading-papers.git \
 进入实际安装目录。手动克隆的 Codex 示例：
 
 ```bash
-cd ~/.codex/skills/skill-reading-papers
+cd ~/.codex/skills/skill-read-papers
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
@@ -160,19 +160,31 @@ latexmk -xelatex -interaction=nonstopmode -halt-on-error main.tex
 
 ## 💬 如何使用
 
-### 📖 首次精读
+### 📖 一句话开始精读
 
-上传 PDF 或给出本地路径，然后说：
+上传 PDF 或给出论文路径、链接，只需说：
 
 ```text
-使用 skill-reading-papers 精读这篇论文。
-请制作三栏 LaTeX：左英文、中中文、右栏先空着。
-每段开头对应，独立公式和原图跨左中两列，只放一份。
-我只有微积分和部分概率论基础，之后会逐步提出问题。
-请交付可编辑的 .tex 和编译后的 .pdf。
+用 skill-read-papers 这个 skill 给我读这篇论文。
 ```
 
-DOI、arXiv 或出版社链接也可作为入口。Agent 会先核对版本与全文；取得不到的部分应明确标出，不以猜测补齐。
+默认就会制作完整三栏双语 LaTeX 阅读稿：左英文、中中文、右笔记，并交付可编辑的 `.tex` 和编译后的 `.pdf`。段首对应、共享图与独立公式、页眉和列宽等规则已经内置，不必重复说“生成三栏阅读文档”。
+
+在 Codex 中也可直接用技能调用写法：
+
+```text
+用 $skill-read-papers 给我读这篇论文。
+```
+
+如有需要，再补充你的知识基础、阅读范围或版式偏好。DOI、arXiv 或出版社链接也可作为入口。Agent 会先核对版本与全文；取得不到的部分应明确标出，不以猜测补齐。
+
+### 🎯 仅在明确指定时启用
+
+本技能采用显式调用模式：只有用户明确要求使用 `skill-read-papers` 时才启用。只说“帮我读论文”“翻译这篇论文”或“三栏精读”，不会自动选择本技能。
+
+已明确启用后的同一阅读任务，可直接继续提问、处理新高光和备注，无需每轮重复技能名。开始另一篇未指定本技能的论文任务时不自动沿用。
+
+Codex 的 `agents/openai.yaml` 已设置 `policy.allow_implicit_invocation: false`，并在技能说明中写明相同边界；其他 Agent 的调用策略以其宿主支持为准。配置说明见 [OpenAI 官方技能文档](https://learn.chatgpt.com/docs/build-skills#optional-metadata)。
 
 ### 🖍️ 把批注变成原生高光和问答
 
@@ -249,7 +261,7 @@ python scripts/audit_reader.py /path/to/main.pdf \
 ## 🗂️ 项目结构
 
 ```text
-skill-reading-papers/
+skill-read-papers/
 ├── SKILL.md                         Agent 入口与默认约定
 ├── agents/openai.yaml               技能界面元数据
 ├── references/
@@ -279,8 +291,8 @@ skill-reading-papers/
 
 ## 🤝 贡献
 
-欢迎提交 [Issue](https://github.com/FUNFUN412/skill-reading-papers/issues) 或
-[Pull Request](https://github.com/FUNFUN412/skill-reading-papers/pulls)，改进 PDF 选区识别、中文数学排版、长备注续排或不同 Agent 的兼容性。
+欢迎提交 [Issue](https://github.com/FUNFUN412/skill-read-papers/issues) 或
+[Pull Request](https://github.com/FUNFUN412/skill-read-papers/pulls)，改进 PDF 选区识别、中文数学排版、长备注续排或不同 Agent 的兼容性。
 
 README 的组织形式参考 [skill-find-papers](https://github.com/FUNFUN412/skill-find-papers)；本项目专注已选论文的持续精读。
 
@@ -292,6 +304,6 @@ README 的组织形式参考 [skill-find-papers](https://github.com/FUNFUN412/sk
 
 **如果这个 Skill 对你有帮助，欢迎点一个 ⭐**
 
-[⬆️ 返回顶部](#-skill-reading-papers)
+[⬆️ 返回顶部](#-skill-read-papers)
 
 </div>

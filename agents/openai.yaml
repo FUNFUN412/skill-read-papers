@@ -1,4 +1,6 @@
 interface:
   display_name: "论文协作精读"
   short_description: "三栏双语论文精读、原生高光批注回写、公式详解与多 Agent 协作核验"
-  default_prompt: "使用 $skill-reading-papers 把这篇论文制作成三栏双语 LaTeX 精读稿，并持续处理我的 PDF 高光、备注和公式详解请求。"
+  default_prompt: "用 $skill-read-papers 给我读这篇论文。"
+policy:
+  allow_implicit_invocation: false

@@ -1,11 +1,19 @@
 ---
-name: skill-reading-papers
-description: Create and maintain source-grounded, three-column English–Chinese LaTeX paper readers with an independent question sidebar. Use for collaborative paper close reading, paragraph-aligned bilingual PDFs, importing PDF highlights/comments into native LaTeX, or adding accessible formula explanation pages. Trigger on 三栏精读、中英对照论文、批注回写、公式详解页 and continuing an existing reading project; ordinary literature discovery and manuscript polishing are outside this workflow.
+name: skill-read-papers
+description: Use only when the user explicitly requests skill-read-papers or invokes $skill-read-papers. Create and maintain three-column English–Chinese LaTeX paper readers with a question sidebar, native PDF highlight/comment import, and formula explanation pages. A named request to read a paper defaults to the full three-column .tex and compiled .pdf; do not activate for generic paper-reading requests without explicit invocation.
 ---
 
 # 论文协作精读
 
-把论文精读做成可持续修改的项目：原文可追溯、译文逐段对应、问题可定位，交付可编辑的 `.tex` 与实际编译的 `.pdf`。已有项目先就地维护；只问一个概念时直接解释，不强制生成整篇文档。
+把论文精读做成可持续修改的项目：原文可追溯、译文逐段对应、问题可定位，交付可编辑的 `.tex` 与实际编译的 `.pdf`。
+
+## 调用条件与默认动作
+
+仅在用户明确指定使用 `skill-read-papers`（包括 `$skill-read-papers` 调用）时启用。用户只说“读论文”“翻译这篇论文”或“三栏精读”，未指定本技能时不自行启用。已明确使用本技能开展的同一阅读任务，可继续处理后续批注和问题，无需每轮重复名称；切换到未指定本技能的新论文任务时不自动沿用。
+
+用户说“用 skill-read-papers 这个 skill 给我读这篇论文”并提供论文文件、路径或链接，即默认进入首次建稿：按下列配置完成三栏双语阅读稿，交付主 `.tex`、实际编译的 `.pdf` 及重建所需源码。用户无需再说“三栏”或重复版式要求，不为默认版式另行询问确认。
+
+已有项目先就地维护并沿用设置；用户明确只问某个概念、公式或指定局部时，按该范围处理，不强制生成整篇文档。
 
 ## 选择本次路径
 
@@ -16,7 +24,7 @@ description: Create and maintain source-grounded, three-column English–Chinese
 
 ## 默认阅读配置
 
-用户要求优先；继续已有项目时沿用已确认的配置。新建三栏稿默认采用：
+用户要求优先；继续已有项目时沿用已确认的配置。明确调用本技能阅读一篇新论文时，默认生成三栏稿并采用：
 
 | 项目 | 默认行为 |
 |---|---|

@@ -5,7 +5,7 @@
 开始时读取用户当前标注的文件，计算 SHA256，并存入 `annotations/` 中不会被后续编译覆盖的位置。不要先重编译 `main.pdf` 再寻找备注。导入示例：
 
 ```bash
-python /path/to/skill-reading-papers/scripts/extract_annotations.py main.pdf \
+python /path/to/skill-read-papers/scripts/extract_annotations.py main.pdf \
   --output annotations/import.json --snapshot-dir annotations/snapshots
 ```
 
